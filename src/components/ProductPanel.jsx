@@ -2,6 +2,11 @@ import { products } from '../data/products.js';
 
 const FINISH_LABELS = { matte: '매트', satin: '새틴', gloss: '글로스' };
 
+/**
+ * 하단에 뜨는 하얀색 리모컨 패널입니다.
+ * 립 컬러 목록(스와치), 발색 강도 슬라이더, 혼합 모드 버튼을 렌더링하고
+ * 사용자가 조작할 때마다 부모(App.jsx)에게 새로운 값을 올려보냅니다.
+ */
 export default function ProductPanel({
   selectedProduct,
   onSelect,
@@ -39,7 +44,7 @@ export default function ProductPanel({
         )}
       </div>
 
-      {/* 색상 스와치 가로 스크롤 */}
+      {/* 1. 색상 스와치 가로 스크롤 영역 (다이소 6종 립 틴트) */}
       <div className="color-carousel">
         {products.map((p) => {
           const isSelected = selectedProduct?.id === p.id;
@@ -107,12 +112,14 @@ export default function ProductPanel({
 
         <div className="divider" />
 
-        {/* 블렌딩 모드 피커 */}
+        {/* 3. 블렌딩 모드 피커 (Canvas 합성 방식 변경) */}
         <div className="blend-section">
           <span className="blend-title">혼합 모드</span>
           <div className="segmented-control">
             {[
+              // multiply: 원래 입술 명암을 유지하면서 색을 입힘 (자연스러움)
               { value: 'multiply', label: '자연스럽게' },
+              // source-over: 원래 입술색을 무시하고 불투명하게 덮어버림 (선명함)
               { value: 'source-over', label: '선명하게' },
             ].map(({ value, label }) => {
               const isActive = blendMode === value;

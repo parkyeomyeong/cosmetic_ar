@@ -1,4 +1,10 @@
+/**
+ * AI 모델을 다운로드 받는 동안(약 10~20초) 화면 전체를 덮는 까만 로딩 화면입니다.
+ * 에러 발생 시 카메라 권한 거부 등의 메시지와 새로고침 버튼도 띄웁니다.
+ * @param status: 'loading' | 'ready' | 'error'
+ */
 export default function LoadingOverlay({ status, errorMsg }) {
+  // 전부 준비가 완료되었다면 이 컴포넌트는 아무것도 그리지 않고 사라집니다(투명).
   if (status === 'ready') return null;
 
   return (

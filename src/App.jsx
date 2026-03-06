@@ -6,6 +6,10 @@ import { products } from './data/products.js';
 
 const DEFAULT_PRODUCT = products[0];
 
+/**
+ * 전체 앱의 뼈대이자 모든 상태(데이터)의 중앙 관리소입니다.
+ * 선택된 화장품 색, 발색 농도 등의 데이터를 자식 컴포넌트들에게 뿌려줍니다.
+ */
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(DEFAULT_PRODUCT);
   const [opacity, setOpacity] = useState(0.30);
@@ -21,7 +25,7 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* AR Viewport */}
+      {/* 1. 상단 카메라 미리보기 영역 (AR Viewport) */}
       <div className="ar-viewport">
         <CameraAR
           color={selectedProduct.color}
@@ -31,7 +35,7 @@ export default function App() {
         />
         <LoadingOverlay status={arStatus} errorMsg={errorMsg} />
 
-        {/* Top HUD */}
+        {/* 상단 통합 HUD (Heads-up Display: 앱 이름 뱃지) */}
         {arStatus === 'ready' && (
           <>
             <div className="hud-container">
@@ -40,7 +44,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* 원본 비교 버튼 */}
+            {/* 원본 비교 버튼 (버튼을 누르고 있는 동안 발색 강도를 0으로 만들어 원본을 보여줌) */}
             <button
               className={`compare-btn ${isComparing ? 'active' : ''}`}
               onPointerDown={() => setIsComparing(true)}
@@ -68,7 +72,7 @@ export default function App() {
         )}
       </div>
 
-      {/* Bottom Control Panel */}
+      {/* 2. 하단 리모컨 영역 (제품 선택, 강도 조절 패널) */}
       <div className="bottom-panel">
         <ProductPanel
           selectedProduct={selectedProduct}

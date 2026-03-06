@@ -6,8 +6,13 @@ const MODEL_URL =
   'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task';
 
 /**
- * Initializes MediaPipe FaceLandmarker, starts camera, runs detection loop.
- * Returns videoRef (attach to <video>), landmarksRef (current frame landmarks), status.
+ * MediaPipe FaceLandmarker AI 모델을 초기화하고, 사용자 전면 카메라를 켜서
+ * 매 프레임마다 얼굴(입술) 랜드마크 478개 좌표를 찾아내는 커스텀 훅입니다.
+ * 
+ * @returns { videoRef, landmarksRef, status, errorMsg } 
+ * - videoRef: HTML <video> 태그에 연결할 레퍼런스
+ * - landmarksRef: 현재 인식된 최신 얼굴 좌표 데이터 (렌더링 최적화를 위해 State 대신 Ref 사용)
+ * - status: 'loading' | 'ready' | 'error' (로딩 화면 제어용)
  */
 export function useFaceLandmarker() {
   const videoRef = useRef(null);
@@ -23,21 +28,22 @@ export function useFaceLandmarker() {
 
     async function init() {
       try {
-        // 1. Load WASM runtime + model
+        // 1. MediaPipe WASM 런타임 엔진 및 AI 모델 다운로드 & 초기화
+        // CDN에서 직접 불러와서 별도의 로컬 설치가 필요 없습니다.
         const vision = await FilesetResolver.forVisionTasks(WASM_CDN);
         const landmarker = await FaceLandmarker.createFromOptions(vision, {
           baseOptions: {
             modelAssetPath: MODEL_URL,
             delegate: 'GPU',
           },
-          outputFaceBlendshapes: false,
-          runningMode: 'VIDEO',
-          numFaces: 1,
+          outputFaceBlendshapes: false, // 입술 모양 변화(Blendshapes) 계산은 끄고 순수 좌표만 가져와서 속도 최적화
+          runningMode: 'VIDEO',         // 비디오 스트림용 실시간 모드
+          numFaces: 1,                  // 1명의 얼굴만 인식해서 불필요한 연산 방지
         });
         if (cancelled) { landmarker.close(); return; }
         faceLandmarkerRef.current = landmarker;
 
-        // 2. Request camera
+        // 2. 브라우저 카메라 접근 권한 요청 (전면 셀카 모드, 720p 해상도)
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false,
@@ -63,6 +69,7 @@ export function useFaceLandmarker() {
       }
     }
 
+    // 3. 브라우저 화면이 새로 그려질 때마다(requestAnimationFrame) 얼굴 인식 함수를 반복 실행합니다.
     function startLoop() {
       function detect() {
         if (cancelled) return;
@@ -72,9 +79,12 @@ export function useFaceLandmarker() {
           animFrameRef.current = requestAnimationFrame(detect);
           return;
         }
+        // 최적화 핵심: 비디오의 재생 시간(currentTime)이 이전 프레임과 다를 때만(새 프레임이 들어왔을 때만) 연산을 수행합니다.
         if (video.currentTime !== lastVideoTimeRef.current) {
           lastVideoTimeRef.current = video.currentTime;
+          // 비디오 화면을 AI 모델에 넘겨서 좌표를 추론함
           const result = landmarker.detectForVideo(video, performance.now());
+          // 478개의 얼굴 좌표 배열을 저장함. 첫 번째 얼굴([0])만 가져옴.
           landmarksRef.current = result.faceLandmarks[0] ?? null;
         }
         animFrameRef.current = requestAnimationFrame(detect);
