@@ -36,7 +36,7 @@ export default function App() {
           <>
             <div className="hud-container">
               <div className="hud-badge">
-                💄 립 컬러 미리보기
+                💄 딘토 립 컬러 미리보기
               </div>
             </div>
 
@@ -52,6 +52,18 @@ export default function App() {
             >
               원본
             </button>
+
+            {/* 제품 링크 버튼 */}
+            {selectedProduct?.url && (
+              <a
+                href={selectedProduct.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="buy-btn"
+              >
+                제품 보러가기
+              </a>
+            )}
           </>
         )}
       </div>

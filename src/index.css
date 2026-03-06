@@ -429,3 +429,31 @@ body {
   transform: scale(0.95);
   border-color: rgba(255, 255, 255, 0.4);
 }
+
+/* 구매 바로가기 (Buy Link) Floating Button */
+.buy-btn {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  /* 원본 버튼(좌측 하단)의 반대편인 우측 하단에 배치 */
+  background-color: rgba(244, 63, 94, 0.9);
+  /* 테마 색상 핑크 */
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  pointer-events: auto;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+  text-decoration: none;
+  z-index: 50;
+  transition: transform 0.1s, background-color 0.1s;
+}
+
+.buy-btn:active {
+  transform: scale(0.95);
+  background-color: rgba(244, 63, 94, 1);
+}
