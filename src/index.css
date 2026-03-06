@@ -1,0 +1,431 @@
+@import "tailwindcss";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: #000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── App Container (새로운 순수 CSS 레이아웃) ────────────────────── */
+.app-container {
+  width: 100vw;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: #F2F2F7;
+  overflow: hidden;
+  user-select: none;
+}
+
+.ar-viewport {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  background-color: #000;
+}
+
+.hud-container {
+  position: absolute;
+  top: 1rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.hud-badge {
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+}
+
+.bottom-panel {
+  flex-shrink: 0;
+  background-color: #ffffff;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+  /* 아이폰 하단 홈 바 영역 대비 패딩 */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── Product Panel (새로운 순수 CSS 컴포넌트) ────────────────────── */
+.product-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: transparent;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 8px 24px;
+}
+
+.panel-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  letter-spacing: -0.5px;
+}
+
+.selected-product-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #F2F2F7;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.product-color-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.product-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+.product-finish {
+  font-size: 10px;
+  background-color: #fff;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* ── Color Carousel (가로 스크롤 및 스와치) ────────────────────── */
+.color-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 16px;
+  padding: 12px 24px 20px 24px;
+  -ms-overflow-style: none;
+  /* IE, Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.color-carousel::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Webkit */
+}
+
+.color-swatch-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  scroll-snap-align: center;
+  flex-shrink: 0;
+  width: 56px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.color-swatch-btn:focus,
+.color-swatch-btn:focus-visible {
+  outline: none;
+}
+
+.swatch-circle-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  border: 3px solid transparent;
+  /* 충분한 여백 공간으로 원형 잘림 완전 방지 */
+}
+
+.color-swatch-btn.selected .swatch-circle-wrap {
+  border-color: #f43f5e;
+  transform: scale(1.05);
+  /* 버튼 선택 시 부드럽게 커짐 효과 지원 */
+}
+
+.swatch-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.swatch-label {
+  font-size: 10px;
+  text-align: center;
+  width: 100%;
+  color: #8E8E93;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  white-space: normal;
+  word-break: keep-all;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 25px;
+  /* Two lines fit safely */
+}
+
+.color-swatch-btn.selected .swatch-label {
+  color: #000;
+  font-weight: 600;
+}
+
+/* ── Control Group (발색 슬라이더 및 블렌딩 옵션) ────────────────────── */
+.control-group {
+  margin: 0 20px 24px 20px;
+  /* 칙칙했던 회색 배경 완전 제거하고 전체 흰색 패널에 맞게 일치 */
+  background-color: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.slider-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.slider-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+}
+
+.slider-track-wrap {
+  position: relative;
+  width: 100%;
+  padding: 0;
+  /* 패딩 제거: 툴팁과 네이티브 썸네일 이동 폭을 100% 동일하게 일치시키기 위해 */
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.slider-marker {
+  position: absolute;
+  top: 50%;
+  width: 2px;
+  height: 12px;
+  background-color: #C7C7CC;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 5;
+  /* 손잡이(z-index: 10) 아래로 */
+}
+
+.slider-marker-label {
+  position: absolute;
+  bottom: -18px;
+  font-size: 11px;
+  color: #8E8E93;
+  font-weight: 500;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Tooltip UI */
+.slider-tooltip {
+  position: absolute;
+  top: -30px;
+  transform: translateX(-50%);
+  background-color: #f43f5e;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 6px;
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 20;
+  box-shadow: 0 4px 8px rgba(244, 63, 94, 0.3);
+  /* 컴포넌트 쪽 수정된 calc 위치 적용 시, 동그란 버튼 가운데를 완벽하게 유지 */
+  margin-left: 0;
+}
+
+.slider-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 4px 4px 0;
+  border-style: solid;
+  border-color: #f43f5e transparent transparent transparent;
+}
+
+/* iOS Native Range Slider Style */
+.opacity-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  z-index: 10;
+  margin: 0;
+  height: 6px;
+  border-radius: 9999px;
+}
+
+.opacity-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.1s;
+  /* 막대(6px)와 손잡이(28px)의 높이 차이의 절반만큼 위로 끌어올려서 중앙 정렬 */
+  margin-top: -11px;
+}
+
+.opacity-slider::-webkit-slider-thumb:active {
+  transform: scale(1.1);
+}
+
+.opacity-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.opacity-slider::-webkit-slider-runnable-track {
+  border-radius: 9999px;
+  height: 6px;
+}
+
+.divider {
+  height: 1px;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.blend-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.blend-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 12px;
+}
+
+/* iOS Segmented Control Style */
+.segmented-control {
+  display: flex;
+  background-color: #E5E5EA;
+  /* 순정 아이폰 회색 배경 */
+  padding: 3px;
+  border-radius: 9px;
+}
+
+.segment-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #8E8E93;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.segment-btn.active {
+  background-color: #ffffff;
+  color: #000;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* 원본 비교 (Compare) Floating Button */
+.compare-btn {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  pointer-events: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 50;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform 0.1s, background-color 0.1s;
+}
+
+.compare-btn:active,
+.compare-btn.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: scale(0.95);
+  border-color: rgba(255, 255, 255, 0.4);
+}
